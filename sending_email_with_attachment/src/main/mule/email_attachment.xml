@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="308b114c-a71c-4dd3-8bf5-3ec6c00c46ae" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<email:pop3-config name="Email_POP3" doc:name="Email POP3" doc:id="200e8b82-1eab-4238-be42-1947fb3bdf14" >
+		<email:pop3-connection host="localhost" user="vm3085@gmail.com" password="Meeradevi@262" />
+	</email:pop3-config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="95bac503-a4ba-497d-a3a9-20d76fb786d4" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="vm3085@srmist.edu.in" password="Meeradevi@262">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true"/>
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<flow name="imapFlow" doc:id="d2a5b2a1-7e28-42ef-8be8-c0621b0565c3" >
+		<http:listener doc:name="Listener" doc:id="fee30778-b9e7-4ea4-b072-7c3323e18f30" config-ref="HTTP_Listener_config" path="/l"/>
+		<ee:transform doc:name="Transform Message" doc:id="5c2bc794-d50b-4078-a1f3-f62715f985ec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="530f6699-879d-4d54-892c-2ba7ad42d4e4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.parts.test_dependent_initial22323.content]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="f90e04b0-6a5f-40fb-bf29-2f584ab1437c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<email:send doc:name="Send" doc:id="a9fd6a3c-be7e-4548-a966-05b5431a55d7" config-ref="Email_SMTP" fromAddress="vm3085@srmist.edu.in" subject="#['new mail']">
+			<email:to-addresses >
+				<email:to-address value="vishal.rai@veneratesolutions.com" />
+			</email:to-addresses>
+			<email:body>
+				<email:content ><![CDATA[these are the attachments]]></email:content>
+			</email:body>
+			<email:attachments ><![CDATA[#[{
+"test-dependent-initial22323.csv":payload
+
+}]]]></email:attachments>
+		</email:send>
+		<ee:transform doc:name="Transform Message" doc:id="cc93c02d-36f9-4349-a07c-040fb7054841" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
