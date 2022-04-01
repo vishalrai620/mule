@@ -5,19 +5,19 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a330ee19-8c45-497e-9831-4704acd9eb65" >
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4f86e30c-7442-4cd1-8d58-75b19f6b9029" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
-	<flow name="muleFlow" doc:id="e91c7f96-15b3-4a0b-88cc-91107eafdd4e" >
-		<http:listener doc:name="Listener" doc:id="ce6b999f-8f91-4324-b32e-acd0ebf44090" config-ref="HTTP_Listener_config" path="/mule"/>
-		<logger level="INFO" doc:name="Logger" doc:id="4174d608-1fb8-4bf4-8b5f-21291c2a8ddc" message="hi vishal #[payload]"/>
-		<ee:transform doc:name="Transform Message" doc:id="1e3659eb-1997-48f2-a5e5-0be556bc294b" >
+	<flow name="normalFlow" doc:id="d711f24e-2bdb-4973-b80f-fded5f6aed48" >
+		<http:listener doc:name="Listener" doc:id="5759d3c6-b140-4551-8d08-443c1715585c" config-ref="HTTP_Listener_config" path="/normal"/>
+		<logger level="INFO" doc:name="Logger" doc:id="71352245-ebb5-4cff-b954-499d08e4b829" message="hi vishal"/>
+		<ee:transform doc:name="Transform Message" doc:id="e60b2023-434c-4c2f-b054-0dd531d3e568" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	"message":"request recieved"
+	"message":"request recived"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
