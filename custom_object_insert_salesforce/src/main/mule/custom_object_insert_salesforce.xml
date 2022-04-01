@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="57ec9e71-dd15-45fa-a1e3-ef39690b8c5a" >
+		<http:listener-connection host="0.0.0.0" port="8085" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f0222a53-b863-436d-88ef-e6c9470269cf" >
+		<salesforce:basic-connection username="vishal.rai@veneratesolutions.com" password="v9934772260" securityToken="VFdCV5RkIf3R6BKMiR3iTOWmk"/>
+	</salesforce:sfdc-config>
+	<flow name="custom_object_insert_salesforceFlow" doc:id="8cdf0743-299e-46ae-b2d5-d192fa7e7521" >
+		<http:listener doc:name="Listener" doc:id="6ed4fe20-4c7f-4240-8329-abfd9a1ba557" config-ref="HTTP_Listener_config" path="/cus"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c838ca07-2da3-4455-976c-5f55a734761c" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="5bf4027a-5d6c-4459-acba-fc7d710c9b7c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.parts.f.content]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="bea007bb-96dd-47b5-ad46-74488ba60cc2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.testbulkdependents
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="d1e16ebf-6220-4877-af14-991c5ee6df97" config-ref="Salesforce_Config" type="testbulkdependent__c" />
+		<ee:transform doc:name="Transform Message" doc:id="17348806-98f9-4cb7-8e25-12ad87b0c1c1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
