@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="b045238e-0a4c-499c-8b83-380a1a523d98" >
+		<salesforce:basic-connection username="vishal.rai@veneratesolutions.com" password="v9934772260" securityToken="VFdCV5RkIf3R6BKMiR3iTOWmk" />
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="db86000d-ed2e-485c-b110-0eda0df72120" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="updateFlow" doc:id="a93958ef-9213-45a3-bdd2-b91a1e79f8e1" >
+		<http:listener doc:name="Listener" doc:id="58043862-aaca-4563-9ead-68b5218b632b" config-ref="HTTP_Listener_config" path="/update"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b1828396-ad9a-4653-9a5c-d65dfe20de7b" />
+		<salesforce:update type="Account" doc:name="Update" doc:id="c0e40959-0c3e-4053-b060-4dbbabaa1f42" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="e6ca9790-9d4d-4698-8f91-5b1ffca4b206" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

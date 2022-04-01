@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="f152147b-a034-4e07-ae11-709364a65c18" >
+		<file:connection workingDir="C:\Users\Acer\Desktop\assignment" />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="e06f3489-0c5a-4e97-bf2e-07db75f2d32a" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="admin" database="vishal" />
+	</db:config>
+	<flow name="insertFlow" doc:id="6efa32ea-8b9a-43f7-8aa0-a1b5a62bd66a" >
+		<file:listener doc:name="On New or Updated File" doc:id="a2765161-05e2-48f4-abae-89aaf2890907" config-ref="File_Config" directory="C:\Users\Acer\Desktop\assignment" moveToDirectory="C:\Users\Acer\Desktop\this">
+			<scheduling-strategy >
+				<fixed-frequency frequency="180" />
+			</scheduling-strategy>
+		</file:listener>
+		<ee:transform doc:name="Transform Message" doc:id="9e224dd9-14db-4e3c-9159-b5a6c7735ba2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map{	
+	"id":$.id,
+	"name":$.name,
+	"salary":$.salary		
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="3258c3d1-c591-4289-963b-25ca0bc8fa55" >
+			<db:insert doc:name="Insert" doc:id="f600ef72-24a4-4e2e-8f9d-5830e9ead590" config-ref="Database_Config">
+			<db:sql><![CDATA[INSERT INTO utkarsh VALUES(:id,:name,:salary);]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+id:payload.id,
+name:payload.name,
+salary:payload.salary
+}]]]></db:input-parameters>
+		</db:insert>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="74b0a118-8aff-4729-affa-853547f9c3c9" message="#[payload]"/>
+	</flow>
+</mule>
