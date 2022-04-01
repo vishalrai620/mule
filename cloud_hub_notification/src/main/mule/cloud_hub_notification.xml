@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config" doc:id="3875b485-b8d4-40be-b25d-d8db803a528c" >
+		<cloudhub:connection username="vishal268" password="Meeradevi@262" environment="abd727e8-92bd-46a0-8f3c-e97af3799670" />
+	</cloudhub:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6a466f3f-6951-4e82-91db-0d8f7285e622" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="cloud_hub_notificationFlow" doc:id="50b53f98-7869-44c2-a243-dbaac53924a7" >
+		<http:listener doc:name="Listener" doc:id="0a322ddd-6f46-460a-be77-7331629dbcb5" path="/u" config-ref="HTTP_Listener_config"/>
+		<cloudhub:create-notification doc:name="Create Notification" doc:id="d3ec3933-7c5f-4b81-8350-a949b85bd102" config-ref="CloudHub_Config" domain="cloudr">
+			<cloudhub:message ><![CDATA[#["error"]]]></cloudhub:message>
+		</cloudhub:create-notification>
+		<ee:transform doc:name="Transform Message" doc:id="710d41f6-9dbe-4b48-ba73-0bed4ea19c17" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"message deliverd"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
