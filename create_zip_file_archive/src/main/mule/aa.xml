@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:compression="http://www.mulesoft.org/schema/mule/compression"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/compression http://www.mulesoft.org/schema/mule/compression/current/mule-compression.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="38c1e106-bb88-4946-9826-3b55c4a1b800" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="87947343-3100-4c72-ab43-2bd5a45811e0" >
+		<file:connection workingDir="D:\archive" />
+	</file:config>
+	<flow name="aaFlow" doc:id="6f849845-4016-4be7-a4e8-bf8a15d3a2b5" >
+		<http:listener doc:name="Listener" doc:id="b560b93b-0a21-4098-be86-6862332c2546" config-ref="HTTP_Listener_config" path="/je"/>
+		<compression:archive doc:name="Archive" doc:id="f9063c10-b951-4a1d-b406-fe51cb3fa9a6" >
+			<compression:archiver >
+				<compression:zip-archiver />
+			</compression:archiver>
+		</compression:archive>
+		<file:write doc:name="Write" doc:id="d2083256-c972-49d4-a234-731ed0928b94" config-ref="File_Config" path="myzid.zip"/>
+		<ee:transform doc:name="Transform Message" doc:id="c6b6aa8a-7a5e-493f-8011-1df1b13c2510" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"file created"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
