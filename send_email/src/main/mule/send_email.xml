@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="158c14a9-95b1-4a15-9f58-d7817daa6861" >
+		<email:smtp-connection host="smtp.gmail.com" user="vm3085@srmist.edu.in" password="Meeradevi@262" port="587">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="06a0b950-19be-42c0-a97f-10a89d7fb73a" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="d9b60043-3c4d-4cbe-b0d5-ebe679bc81c9" >
+		<file:connection workingDir="C:\Users\Acer\Desktop\hulas" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="2009b628-d44e-4c7b-906a-a71a0d519c0e" >
+		<file:connection workingDir="#[payload]" />
+	</file:config>
+	<file:config name="File_Config2" doc:name="File Config" doc:id="9cd3b312-b76a-4e32-9611-2025ee9529a9" >
+		<file:connection workingDir="C:\Users\Acer\Desktop\hulas" />
+	</file:config>
+	<flow name="send_emailFlow" doc:id="a7c2f1ee-af14-44d7-9740-4a5aec7efe0b" >
+		<http:listener doc:name="Listener" doc:id="21a2ccc5-7639-480d-9299-8561ddb97fe4" config-ref="HTTP_Listener_config" path="/o"/>
+		<ee:transform doc:name="Transform Message" doc:id="95904b30-1856-4e48-8867-e555e0ba9377" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="68e3da67-7965-489f-8e6d-b9f6d030f62d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="07116dc6-f0bc-46ea-abef-9f3071ae987d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv quoteValues=true
+---
+Payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<email:send doc:name="Send" doc:id="c177737d-1873-4d7b-989f-1d519731a640" config-ref="Email_SMTP" fromAddress="vm3085@srmist.edu.in" subject='"new email"'>
+			<email:to-addresses >
+				<email:to-address value="vishal.rai@veneratesolutions.com" />
+			</email:to-addresses>
+			<email:attachments ><![CDATA[#[{
+	"Attachment.lead":payload
+}]]]></email:attachments>
+		</email:send>
+		<ee:transform doc:name="Transform Message" doc:id="1eed6410-9dc2-4048-b03b-547d23b37b56" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
