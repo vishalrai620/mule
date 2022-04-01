@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="83bcb3bc-e15c-445e-b065-dcda41504649" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<validation:config name="Validation_Config1" doc:name="Validation Config" doc:id="fa3fc5cf-29fa-4048-aa7c-80f746bf5fae" i18n="#[@gmail.com]"/>
+	<flow name="validation_componentFlow2" doc:id="fd31dd3a-9abf-4433-be06-59cf702695c2" >
+		<http:listener doc:name="Listener" doc:id="16025dfe-5465-4628-924c-00dd59a64ff0" config-ref="HTTP_Listener_config" path="/validate"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="2882fd3b-e9bd-45ed-916f-2e9fe3741f12" variableName="vis"/>
+		<validation:is-email doc:name="Is email" doc:id="8bee15b6-aa00-4524-8918-bc0188fe7e36" config-ref="Validation_Config1" message="email is not correct" email="#[vars.vis]"/>
+		<ee:transform doc:name="Transform Message" doc:id="b22b47ea-5181-4beb-b1ab-9e1984cae3e2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
