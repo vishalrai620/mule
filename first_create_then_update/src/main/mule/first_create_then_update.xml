@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="b2b38fe6-e1f4-48f1-9f69-233609c3a48a" >
+		<file:connection workingDir="C:\Users\Acer\Desktop\hulas" />
+	</file:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="a72b0f25-2907-439a-b345-84b1088fc30d" >
+		<salesforce:basic-connection username="vishal.rai@veneratesolutions.com" password="Meeradevi@262" securityToken="Ecuh6pCoQzHhwOGgHbsoeUEmz" />
+	</salesforce:sfdc-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="3eb4f54f-1012-4745-bc4c-6317208396d4" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="admin" database="vishal" />
+	</db:config>
+	<flow name="first_create_then_updateFlow" doc:id="b351e008-e02b-4ad7-a036-36f0875de6f4" >
+		<file:listener doc:name="On New or Updated File" doc:id="6d1df274-aa12-4a04-8f1c-4c2a28e32145" config-ref="File_Config" directory="C:\Users\Acer\Desktop\hulas">
+			<scheduling-strategy >
+				<fixed-frequency frequency="250" timeUnit="HOURS" />
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="42242efa-967c-41ff-832c-f67c1d914252" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="a79fe69d-9bf2-4c83-ac2e-4fcb8a40a9c4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8c36d599-143c-47c6-9343-a18a87d89f88" message="after file insert #[payload]"/>
+		<foreach doc:name="For Each" doc:id="2ec73984-6173-4ca5-addd-9f49afb8df06" >
+			<ee:transform doc:name="Transform Message" doc:id="f826aeaa-fa7c-46d8-86eb-39540b851d88" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<db:insert doc:name="Insert" doc:id="2a562faa-0249-469b-9331-be778382422b" config-ref="Database_Config" queryTimeoutUnit="MINUTES" targetValue="#[payload as String]">
+				<db:sql ><![CDATA[insert into hulas values(:Salutation,:Lastname)]]></db:sql>
+				<db:parameter-types />
+				<db:input-parameters ><![CDATA[#[{
+    Salutation: payload.Salutation,
+	Lastname: payload.Lastname
+}]]]></db:input-parameters>
+			</db:insert>
+			<ee:transform doc:name="Transform Message" doc:id="6ce40660-93a8-471f-a33e-ea7c11f6d26e" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="8b37d6a2-6189-4b60-94c6-a68baa4edf81" message="recieved after insert #[payload]"/>
+		</foreach>
+		<salesforce:create doc:name="Create" doc:id="57141246-81a4-4557-b6b2-1bd7dfd14ade" config-ref="Salesforce_Config" type="Contact"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4884f5b4-babe-481c-9fe3-4372c4dfeabd" message=" after salesforce  #[payload]"/>
+	</flow>
+</mule>
