@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="23f431d2-8731-4dd6-9fbb-93e78d00ec9b" >
+<http:listener-connection host="0.0.0.0" port="8081" />
+</http:listener-config>
+<flow name="sample3Flow" doc:id="628d1c11-dadc-444c-97e6-af4cb4f65eb5" >
+<http:listener doc:name="Listener" doc:id="dbcaaa96-49dd-437f-887c-6577b9b20641" path="/q" config-ref="HTTP_Listener_config"/>
+<set-payload value='#[[
+&#10; {"name":"productA", "amount":100,"price":"200"},
+&#10; {"name":"productB", "amount":40,"price":"400"},
+&#10; {"name":"productC", "amount":2,"price":"600"}
+&#10;]]' doc:name="Set Payload" doc:id="a14ccb1a-8ae3-40e9-9b75-d207f8a34e62" />
+<batch:job jobName="sample3Batch_Job" doc:id="ec4ce814-09d3-4150-bbe4-fff505ba16aa" >
+<batch:process-records >
+<batch:step name="LessThan50" doc:id="62855862-0401-41f1-b9d0-2c936a4aacf0" acceptExpression='#[payload.amount &lt; 50]' acceptPolicy="ALL">
+<set-payload value='#[{"amount": payload.amount + 100}]' doc:name='{"amount": payload.amount + 100}' doc:id="b4d8698f-4c9a-4206-92ac-9fc75a037e42" />
+<logger level="INFO" doc:name="Logger" doc:id="57116f65-c9ae-4218-8b9a-e7d027485f9f" message="#[payload]"/>
+</batch:step>
+<batch:step name="Greaterthan20" doc:id="0e2b13bc-1758-4229-b919-b9e172a31012" acceptExpression='#[payload.amount &gt; 20]' acceptPolicy="ALL">
+<set-payload value='#[{step2amount: payload.amount}]' doc:name="{step2amount: payload.amount}" doc:id="6c481bbc-a96c-42d8-ae04-b7906d4ed698" />
+<logger level="INFO" doc:name="Logger" doc:id="888f0b0e-c93e-4883-ba01-1fcefaa01212" message="#[payload]"/>
+</batch:step>
+</batch:process-records>
+</batch:job>
+		<ee:transform doc:name="Transform Message" doc:id="97c8210a-cd79-41f1-911e-d457ed0b214c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+</flow>
+</mule>
