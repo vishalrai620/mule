@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e02a82f8-65e3-49df-bc04-c14af95e2eee" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="9b70cf50-e092-4a9d-ad1c-e344aba48412" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="admin" database="vishal" />
+	</db:config>
+	<flow name="munit_error_handling_complete_databaseFlow" doc:id="4df77e83-dce2-424c-8c48-c4e42472ca47" >
+		<http:listener doc:name="Listener" doc:id="369b76b7-6fc4-4ec5-b2b9-ffbe57b15f8d" config-ref="HTTP_Listener_config" path="/err"/>
+		<logger level="INFO" doc:name="Logger" doc:id="919b0c4e-49aa-4f2d-b137-aa65591629e3" message="#[payload]"/>
+		<db:select doc:name="Select" doc:id="f3eb7f99-5714-464a-85a9-f05850833391" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT Salutation,Lastname fROM hulas]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="1a0023c6-170d-430e-9805-64d1440621b9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="549e15d7-8151-495b-89b5-657fbf7a0d6e" message="#[payload]"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="513af0f5-aec2-4d62-8f1b-6fbe90ba0f32" type="DB:CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="7b3d8e66-6098-4088-b4ba-84527aee5b54" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"message":"database_connectivity error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
