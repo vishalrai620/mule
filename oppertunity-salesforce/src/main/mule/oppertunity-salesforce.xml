@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="4c2537bb-561e-462a-91c9-e90f34db3a90" >
+		<salesforce:basic-connection username="vishal.rai@veneratesolutions.com" password="Meeradevi@262" securityToken="DoF3gZ8wk0bdOcLdOhkUByBd" />
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a5a878ec-376a-4109-b352-031defee50a7" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="oppertunity-salesforceFlow" doc:id="77ea5ad8-ce89-47c6-a56c-b4ba433d3c75" >
+		<http:listener doc:name="Listener" doc:id="3f717137-1bcf-48dd-8f27-f1f9fb800aa0" config-ref="HTTP_Listener_config" path="oppertunity"/>
+		<salesforce:create doc:name="Create" doc:id="c6eb3a8f-2f21-4676-85c9-8938958c9737" config-ref="Salesforce_Config" type="Task"/>
+		<ee:transform doc:name="Transform Message" doc:id="d5436a0d-699b-4d7d-8c0b-16a0b69a4148" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
