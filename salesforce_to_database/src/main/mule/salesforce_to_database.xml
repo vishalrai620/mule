@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="db5efe67-afc9-4f95-bd15-ea89b5139cb4" >
+		<salesforce:basic-connection username="vishal.rai@veneratesolutions.com" password="v9934772260" securityToken="VFdCV5RkIf3R6BKMiR3iTOWmk" />
+	</salesforce:sfdc-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="7a231ed8-f383-4c33-a0f7-c97d42332c6d" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="admin" database="vishal" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0414ecbd-c984-4655-b49c-c7677de4c242" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<flow name="salesforce_to_databaseFlow" doc:id="8f4a8672-c8a3-420f-8ffa-2859ae1e62fa" >
+		<http:listener doc:name="Listener" doc:id="7ed57cdf-69f3-4d52-8027-d86a2edab33b" config-ref="HTTP_Listener_config" path="/batch"/>
+		<salesforce:query doc:name="Query" doc:id="3f7b70aa-a270-4214-9e17-94696814f4fe" config-ref="Salesforce_Config">
+						<salesforce:salesforce-query><![CDATA[Select Name,Phone from Account]]></salesforce:salesforce-query>
+					</salesforce:query>
+		<batch:job jobName="salesforce_to_databaseBatch_Job" doc:id="b5c6d355-f87b-4118-bfa2-3b42052dc677" >
+			<batch:process-records >
+				<batch:step name="Batch_Step1" doc:id="9082f15d-428e-4138-8b0c-027a9357eec9" >
+					<logger level="INFO" doc:name="Logger" doc:id="cd1ba3b7-2e4b-4742-bcbc-9fd982dbc321" message="#[payload]"/>
+				</batch:step>
+				<batch:step name="Batch_Step" doc:id="227b8c27-07a1-4d04-9a08-05d6bd406494" >
+					<ee:transform doc:name="Transform Message" doc:id="a3dc0eb9-3bdd-44a0-b9a2-5a275ef58f00" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<db:insert doc:name="Insert" doc:id="e4ce9ae1-1733-4a1a-868e-cfb0511147c1" config-ref="Database_Config">
+						<db:sql ><![CDATA[  INSERT INTO hulas (Salutation,Lastname) VALUES (:Salutation, :Lastname)]]></db:sql>
+						<db:input-parameters ><![CDATA[#[{
+	Salutation:payload.Name,
+	Lastname:payload.Phone
+}]]]></db:input-parameters>
+					</db:insert>
+					<logger level="INFO" doc:name="Logger" doc:id="9e3c524b-0b9f-4cf3-8513-e1387bcdc908" message="#[payload]"/>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="6c8e7ad0-f730-4969-9e46-d71237883e0a" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+		<ee:transform doc:name="Transform Message" doc:id="89b26172-4cbb-4f90-aa2a-7ed5d2910bfa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

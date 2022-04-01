@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="hh" format="json">
+      <types:shape format="weave" example="examples/salutation_hulas.txt"><![CDATA[%dw 2.0
+
+type hh = {|
+  Salutation: String, 
+  Lastname: String
+|} {"example": "{\\\"Salutation\\\":\\\"\\\",\\\"Lastname\\\":\\\"\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a3dc0eb9-3bdd-44a0-b9a2-5a275ef58f00"/>
+</types:mule>
